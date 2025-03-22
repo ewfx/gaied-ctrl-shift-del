@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Run main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/code/src/main.py",
+            "python": "${workspaceFolder}/venv/Scripts/python"
+        }
+    ]
+}
