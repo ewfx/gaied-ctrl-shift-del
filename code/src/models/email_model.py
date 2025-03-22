@@ -1,9 +1,17 @@
 from typing import List, Optional
 
+
 class Email:
     """Class representing an email with sender, subject, date, body, and attachments."""
 
-    def __init__(self, sender: str, subject: str, date: str, body: Optional[str], attachments: List[tuple]):
+    def __init__(
+        self,
+        sender: str,
+        subject: str,
+        date: str,
+        body: Optional[str],
+        attachments: List[tuple],
+    ):
         self.sender = sender
         self.subject = subject
         self.date = date
@@ -22,7 +30,7 @@ class Email:
     #     print("-" * 50)
     #     print(f"📜 Body:\n{self.body[:500]}")  # Limit body length for readability
     #     print("-" * 50)
-        
+
     #     if self.attachments:
     #         print("📎 Attachments:")
     #         for filename, text in self.attachments:
@@ -31,5 +39,5 @@ class Email:
     #             print("-" * 30)
     #     else:
     #         print("📎 Attachments: None")
-        
+
     #     print("=" * 50, "\n")
