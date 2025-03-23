@@ -1,3 +1,4 @@
+import os
 from email_processor import EmailProcessor
 from llm_service import HuggingFaceLLM
 from models.email_model import Email
@@ -10,13 +11,17 @@ email_processor = EmailProcessor(
     llm, supported_service_requests, confidence_threshold=0.6
 )
 
+# Simulating a PDF attachment (replace with actual file bytes)
+with open("./artifacts/Loan_Adjustment_Request.docx", "rb") as file:
+    pdf_bytes = file.read()
+
 # Create an email object
 email = Email(
     sender="john.doe@example.com",
     subject="Adjustment Request for Loan #12345",
     date="2025-03-22",
     body="Hello, I need to adjust the principal amount of my loan #12345. The adjustment should be effective from 2025-04-01. Reason: Incorrect disbursement. Please approve.",
-    attachments=[],
+    attachments=[("loan_details.docx", pdf_bytes)]
 )
 
 # Process the email

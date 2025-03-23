@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class Email:
@@ -9,13 +9,14 @@ class Email:
         sender: str,
         subject: str,
         date: str,
-        body: Optional[str],
-        attachments: List[tuple],
+        body: str,
+        attachments: List[Tuple[str, bytes]],
     ):
         self.sender = sender
         self.subject = subject
         self.date = date
         self.body = body
+        self.attachments=attachments
         # self.attachments = attachments  # List of tuples (filename, extracted text)
 
     def __repr__(self):
