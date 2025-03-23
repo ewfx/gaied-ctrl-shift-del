@@ -1,5 +1,5 @@
 class ServiceRequest:
-    def __init__(self, request_type, description, dynamic_fields):
+    def __init__(self, request_type, description, dynamic_fields, sub_requests):
         self.request_type = (
             request_type  # Type of service request (e.g., Adjustment, Fee Payment)
         )
@@ -13,6 +13,7 @@ class ServiceRequest:
 
         # Dynamic fields that are specific to the request type
         self.dynamic_fields = dynamic_fields
+        self.sub_requests= sub_requests
 
     def get_all_fields(self):
         """Returns a dictionary of all required fields (fixed + dynamic)."""

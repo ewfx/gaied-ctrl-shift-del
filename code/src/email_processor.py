@@ -28,10 +28,10 @@ class EmailProcessor:
     def process_email(self, email: Email) -> EmailProcessingResponse:
         """
         Process an email by first converting it into a structured classification input,
-        then classifying it into a service request type and extracting relevant fields.
+        then classifying it into a service request type and sub-request type before extracting relevant fields.
         """
         classification_input = self.preprocessing_service.preprocess_email(email)
-        request_type, confidence_score = self._classify_email(
+        request_type, sub_request_type, confidence_score = self._classify_email(
             classification_input.subject,
             classification_input.body,
             classification_input.attachments,
@@ -53,30 +53,40 @@ class EmailProcessor:
             classification_input.attachments,
             service_request,
         )
-        return EmailProcessingResponse(request_type, extracted_fields, confidence_score)
+        return EmailProcessingResponse(f"{request_type} - {sub_request_type}", extracted_fields, confidence_score)
 
     def _classify_email(
         self, email_subject: str, email_body: str, attachments: List[str]
-    ) -> Tuple[str, float]:
+    ) -> Tuple[str, str, float]:
         """
-        Classifies an email into a service request type using zero-shot classification.
+        Classifies an email into a service request type and sub-request type using zero-shot classification.
         """
-        # Combine email body and extracted attachment text
         full_text = f"Subject: {email_subject}\nBody: {email_body}"
 
-        labels = [f"{key} Request" for key in self.service_request_definitions.keys()]
+        # Classify main request type
+        labels = list(self.service_request_definitions.keys())
         classification_result = self.llm_service.zero_shot_classify(
             HuggingFaceModel.BART_LARGE_MNLI, full_text, labels
         )
 
         if "labels" not in classification_result or not classification_result["labels"]:
-            return "Unclassified", 0.0
+            return "Unclassified", "Unclassified", 0.0
 
-        best_match_label = classification_result["labels"][0]
+        request_type = classification_result["labels"][0]
         confidence_score = classification_result["scores"][0]
-        best_request_key = best_match_label.split(" ")[0]
 
-        return best_request_key, confidence_score
+        # Classify sub-request type if applicable
+        sub_request_type = "General"
+        if request_type in self.service_request_definitions:
+            sub_labels = self.service_request_definitions[request_type].sub_requests
+            if sub_labels:
+                sub_classification_result = self.llm_service.zero_shot_classify(
+                    HuggingFaceModel.BART_LARGE_MNLI, full_text, sub_labels
+                )
+                if "labels" in sub_classification_result and sub_classification_result["labels"]:
+                    sub_request_type = sub_classification_result["labels"][0]
+
+        return request_type, sub_request_type, confidence_score
 
     def _extract_fields(
         self,
@@ -85,14 +95,14 @@ class EmailProcessor:
         attachments: str,
         service_request: ServiceRequest,
     ) -> Dict[str, Any]:
-        fields_to_extract = service_request.get_all_fields()
+        fields_to_extract = service_request.dynamic_fields
 
         if not fields_to_extract:
             return {}
 
         prompt = f"""
         Extract the following fields from the email subject and body, considering different possible names and contexts:
-        {', '.join(fields_to_extract)}
+        {', '.join(fields_to_extract.keys())}
 
         Subject: {email_subject}
 

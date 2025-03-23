@@ -1,7 +1,6 @@
-# List to store service request definitions
 from models.service_request_model import ServiceRequest
 
-
+# List to store service request definitions with sub-request types
 supported_service_requests = {
     "Adjustment": ServiceRequest(
         request_type="Adjustment",
@@ -13,6 +12,7 @@ supported_service_requests = {
             "Reason for Adjustment": "Required",
             "Approving Authority": "Required",
         },
+        sub_requests=["Reallocation Fees", "Amendment Fees", "Reallocation Principal"]
     ),
     "AU Transfer": ServiceRequest(
         request_type="AU Transfer",
@@ -25,6 +25,7 @@ supported_service_requests = {
             "Reference ID": "Required",
             "Remarks": "Optional",
         },
+        sub_requests=[]
     ),
     "Closing Notice": ServiceRequest(
         request_type="Closing Notice",
@@ -36,6 +37,7 @@ supported_service_requests = {
             "Remaining Balance": "Optional",
             "Settlement Instructions": "Required",
         },
+        sub_requests=["Cashless Roll", "Reallocation Principal"]
     ),
     "Commitment Change": ServiceRequest(
         request_type="Commitment Change",
@@ -47,6 +49,7 @@ supported_service_requests = {
             "Reason for Change": "Required",
             "Approval Details": "Required",
         },
+        sub_requests=["Increase", "Decrease"]
     ),
     "Fee Payment": ServiceRequest(
         request_type="Fee Payment",
@@ -58,6 +61,7 @@ supported_service_requests = {
             "Payment Method": "Required",
             "Invoice Reference": "Optional",
         },
+        sub_requests=["Ongoing Fee", "Letter of Credit Fee"]
     ),
     "Money Movement - Inbound": ServiceRequest(
         request_type="Money Movement - Inbound",
@@ -70,6 +74,7 @@ supported_service_requests = {
             "Payment Mode": "Required",
             "Reference Number": "Optional",
         },
+        sub_requests=["Principal", "Interest", "Principal + Interest", "Principal + Interest + Fee"]
     ),
     "Money Movement - Outbound": ServiceRequest(
         request_type="Money Movement - Outbound",
@@ -83,11 +88,19 @@ supported_service_requests = {
             "Payment Mode": "Required",
             "Exchange Rate": "Optional",
         },
+        sub_requests=["Timebound", "Foreign Currency"]
     ),
 }
 
-# Display all request types
+# Function to get sub-requests for a given request type
+def get_sub_requests(request_type):
+    if request_type in supported_service_requests:
+        return supported_service_requests[request_type].sub_requests
+    return []
+
+# Display all request types with sub-requests
 if __name__ == "__main__":
-    for request_type in supported_service_requests:
-        supported_service_requests[request_type].display_definition()
+    for request_type, service in supported_service_requests.items():
+        service.display_definition()
+        print("Sub-Requests:", ", ".join(service.sub_requests) if service.sub_requests else "None")
         print("\n" + "-" * 50 + "\n")
