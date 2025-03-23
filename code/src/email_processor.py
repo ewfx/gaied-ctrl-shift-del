@@ -31,7 +31,7 @@ class EmailProcessor:
         then classifying it into a service request type and extracting relevant fields.
         """
         classification_input = self.preprocessing_service.preprocess_email(email)
-        request_type, confidence_score = self._classify_email(
+        request_type, sub_request_type, confidence_score = self._classify_email(
             classification_input.subject,
             classification_input.body,
             classification_input.attachments,
@@ -41,23 +41,28 @@ class EmailProcessor:
             logging.warning(
                 "Low confidence classification. Marking as 'Needs Manual Review'."
             )
-            return EmailProcessingResponse("Needs Manual Review", {}, confidence_score)
+            return EmailProcessingResponse(
+                "Needs Manual Review", "", {}, confidence_score
+            )
 
         service_request = self.service_request_definitions.get(request_type)
         if not service_request:
-            return EmailProcessingResponse("Unknown", {}, confidence_score)
+            return EmailProcessingResponse("Unknown", "", {}, confidence_score)
 
         extracted_fields = self._extract_fields(
             classification_input.subject,
             classification_input.body,
             classification_input.attachments,
             service_request,
+            sub_request_type,
         )
-        return EmailProcessingResponse(request_type, extracted_fields, confidence_score)
+        return EmailProcessingResponse(
+            request_type, sub_request_type, extracted_fields, confidence_score
+        )
 
     def _classify_email(
         self, email_subject: str, email_body: str, attachments: List[str]
-    ) -> Tuple[str, float]:
+    ) -> Tuple[str, str, float]:
         """
         Classifies an email into a service request type using zero-shot classification.
         """
@@ -70,13 +75,31 @@ class EmailProcessor:
         )
 
         if "labels" not in classification_result or not classification_result["labels"]:
-            return "Unclassified", 0.0
+            return "Unclassified", "", 0.0
 
         best_match_label = classification_result["labels"][0]
         confidence_score = classification_result["scores"][0]
-        best_request_key = best_match_label.split(" ")[0]
+        best_request_key = best_match_label.rsplit(" Request", 1)[0]
 
-        return best_request_key, confidence_score
+        sub_request_key = ""
+        if best_request_key in self.service_request_definitions:
+            sub_labels = [
+                f"{key} Request"
+                for key in self.service_request_definitions[
+                    best_request_key
+                ].sub_service_requests.keys()
+            ]
+            sub_classification_result = self.llm_service.zero_shot_classify(
+                HuggingFaceModel.BART_LARGE_MNLI, full_text, sub_labels
+            )
+            if (
+                "labels" in sub_classification_result
+                and sub_classification_result["labels"]
+            ):
+                sub_best_match_label = sub_classification_result["labels"][0]
+                sub_request_key = sub_best_match_label.rsplit(" Request", 1)[0]
+
+        return best_request_key, sub_request_key, confidence_score
 
     def _extract_fields(
         self,
@@ -84,8 +107,15 @@ class EmailProcessor:
         email_body: str,
         attachments: str,
         service_request: ServiceRequest,
+        sub_request_type: str,
     ) -> Dict[str, Any]:
+        # Get base fields
         fields_to_extract = service_request.get_all_fields()
+
+        # Add sub-request fields if sub-request type is specified
+        if sub_request_type:
+            sub_fields = service_request.get_sub_service_fields(sub_request_type)
+            fields_to_extract.update(sub_fields)
 
         if not fields_to_extract:
             return {}

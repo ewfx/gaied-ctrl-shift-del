@@ -5,89 +5,189 @@ from models.service_request_model import ServiceRequest
 supported_service_requests = {
     "Adjustment": ServiceRequest(
         request_type="Adjustment",
-        description="Request to adjust loan parameters such as fees or principal.",
+        description="Request to adjust financial amounts related to a loan.",
         dynamic_fields={
-            "Adjustment Type": "Required",  # Reallocation Fees / Amendment Fees / Reallocation Principal
-            "Amount": "Required",
-            "Effective Date": "Required",
-            "Reason for Adjustment": "Required",
-            "Approving Authority": "Required",
+            "Adjustment Amount": "Required",  # Amount to be adjusted
+            "Adjustment Reason": "Required",  # Justification for the adjustment
+            "Effective Date": "Required",  # Date when adjustment takes effect
         },
     ),
     "AU Transfer": ServiceRequest(
         request_type="AU Transfer",
-        description="Transfer funds between internal bank accounts.",
+        description="Request to transfer an asset unit.",
         dynamic_fields={
-            "From Account ID": "Required",
-            "To Account ID": "Required",
-            "Transfer Amount": "Required",
-            "Transfer Date": "Required",
-            "Reference ID": "Required",
-            "Remarks": "Optional",
+            "Source AU": "Required",  # Source Asset Unit
+            "Target AU": "Required",  # Destination Asset Unit
+            "Transfer Amount": "Required",  # Amount being transferred
         },
     ),
     "Closing Notice": ServiceRequest(
         request_type="Closing Notice",
-        description="Finalize a loan and handle outstanding balances.",
+        description="Request related to closing a loan or financial account.",
         dynamic_fields={
-            "Closing Type": "Required",  # Cashless Roll / Reallocation Principal
-            "Final Payment Amount": "Required",
-            "Closing Date": "Required",
-            "Remaining Balance": "Optional",
-            "Settlement Instructions": "Required",
+            "Closure Date": "Required",  # Date when the loan/account closes
+            "Remaining Balance": "Required",  # Outstanding balance at closure
+            "Closure Reason": "Required",  # Justification for closing
+        },
+        sub_service_requests={
+            "Reallocation Fees": ServiceRequest(
+                request_type="Reallocation Fees",
+                description="Request to reallocate fees during closure.",
+                dynamic_fields={
+                    "Fee Type": "Required",  # Type of fee being reallocated
+                    "Reallocation Amount": "Required",  # Amount being moved
+                },
+            ),
+            "Amendment Fees": ServiceRequest(
+                request_type="Amendment Fees",
+                description="Request to amend fees during closure.",
+                dynamic_fields={
+                    "Fee Type": "Required",
+                    "New Fee Amount": "Required",
+                },
+            ),
+            "Reallocation Principal": ServiceRequest(
+                request_type="Reallocation Principal",
+                description="Request to reallocate principal during closure.",
+                dynamic_fields={
+                    "Reallocation Amount": "Required",
+                    "Target Account": "Required",  # Where the principal is moved
+                },
+            ),
         },
     ),
     "Commitment Change": ServiceRequest(
         request_type="Commitment Change",
-        description="Modify the committed loan amount.",
+        description="Request to change commitment terms for a loan.",
         dynamic_fields={
-            "Change Type": "Required",  # Increase / Decrease
-            "New Commitment Amount": "Required",
-            "Effective Date": "Required",
-            "Reason for Change": "Required",
-            "Approval Details": "Required",
+            "Commitment ID": "Required",  # Unique identifier for commitment
+            "Change Reason": "Required",  # Justification for the change
+        },
+        sub_service_requests={
+            "Cashless Roll": ServiceRequest(
+                request_type="Cashless Roll",
+                description="Extend commitment without new cash movement.",
+                dynamic_fields={
+                    "New Expiry Date": "Required",  # Extension date
+                    "Justification": "Required",
+                },
+            ),
+            "Decrease": ServiceRequest(
+                request_type="Decrease",
+                description="Decrease the commitment amount.",
+                dynamic_fields={
+                    "New Commitment Amount": "Required",
+                    "Effective Date": "Required",
+                },
+            ),
+            "Increase": ServiceRequest(
+                request_type="Increase",
+                description="Increase the commitment amount.",
+                dynamic_fields={
+                    "New Commitment Amount": "Required",
+                    "Funding Source": "Required",  # Source of additional funds
+                },
+            ),
         },
     ),
     "Fee Payment": ServiceRequest(
         request_type="Fee Payment",
-        description="Process a payment for loan-related fees.",
+        description="Request for fee-related payments.",
         dynamic_fields={
-            "Fee Type": "Required",  # Ongoing Fee / Letter of Credit Fee
-            "Fee Amount": "Required",
             "Payment Date": "Required",
-            "Payment Method": "Required",
-            "Invoice Reference": "Optional",
+            "Payment Amount": "Required",
+            "Payment Method": "Required",  # e.g., Wire Transfer, ACH
+        },
+        sub_service_requests={
+            "Ongoing Fee": ServiceRequest(
+                request_type="Ongoing Fee",
+                description="Payment of ongoing fees.",
+                dynamic_fields={
+                    "Fee Period": "Required",  # Monthly, Quarterly, etc.
+                    "Due Date": "Required",
+                },
+            ),
+            "Letter of Credit Fee": ServiceRequest(
+                request_type="Letter of Credit Fee",
+                description="Payment for Letter of Credit fees.",
+                dynamic_fields={
+                    "LOC Number": "Required",  # Identifier for the Letter of Credit
+                    "Fee Due Date": "Required",
+                },
+            ),
+            "Principal": ServiceRequest(
+                request_type="Principal",
+                description="Payment towards principal amount.",
+                dynamic_fields={
+                    "Principal Amount": "Required",
+                    "Payment Schedule": "Optional",
+                },
+            ),
+            "Interest": ServiceRequest(
+                request_type="Interest",
+                description="Payment of interest amount.",
+                dynamic_fields={
+                    "Interest Period": "Required",  # Interest calculation period
+                    "Interest Rate": "Required",  # Applied interest rate
+                },
+            ),
+            "Principal + Interest": ServiceRequest(
+                request_type="Principal + Interest",
+                description="Payment of both principal and interest.",
+                dynamic_fields={
+                    "Total Payment Amount": "Required",
+                    "Breakdown Required": "Optional",  # If separate principal & interest amounts needed
+                },
+            ),
         },
     ),
     "Money Movement - Inbound": ServiceRequest(
         request_type="Money Movement - Inbound",
-        description="Receive payments from borrowers.",
+        description="Inbound money transfer related to a loan or fee.",
         dynamic_fields={
-            "Payment Type": "Required",  # Principal / Interest / Principal + Interest / Principal + Interest + Fee
-            "Amount Paid": "Required",
-            "Payment Date": "Required",
-            "Payer Details": "Required",
-            "Payment Mode": "Required",
-            "Reference Number": "Optional",
+            "Transfer Date": "Required",
+            "Sender Details": "Required",
+            "Transfer Amount": "Required",
+            "Receiving Account": "Required",
+        },
+        sub_service_requests={
+            "Principal + Interest + Fee": ServiceRequest(
+                request_type="Principal + Interest + Fee",
+                description="Inbound transfer covering principal, interest, and fees.",
+                dynamic_fields={
+                    "Principal Component": "Required",
+                    "Interest Component": "Required",
+                    "Fee Component": "Required",
+                },
+            ),
         },
     ),
     "Money Movement - Outbound": ServiceRequest(
         request_type="Money Movement - Outbound",
-        description="Bank disburses payments such as loan disbursement.",
+        description="Outbound money transfer related to a loan or fee.",
         dynamic_fields={
-            "Payment Type": "Required",  # Timebound / Foreign Currency
-            "Amount": "Required",
-            "Currency": "Required",
+            "Transfer Date": "Required",
             "Recipient Details": "Required",
-            "Payment Date": "Required",
-            "Payment Mode": "Required",
-            "Exchange Rate": "Optional",
+            "Transfer Amount": "Required",
+            "Payment Method": "Required",
+        },
+        sub_service_requests={
+            "Timebound": ServiceRequest(
+                request_type="Timebound",
+                description="Outbound transfer with a time restriction.",
+                dynamic_fields={
+                    "Execution Date": "Required",
+                    "Time Constraint": "Required",
+                },
+            ),
+            "Foreign Currency": ServiceRequest(
+                request_type="Foreign Currency",
+                description="Outbound transfer in a foreign currency.",
+                dynamic_fields={
+                    "Currency Type": "Required",  # USD, EUR, INR, etc.
+                    "Exchange Rate": "Required",
+                },
+            ),
         },
     ),
 }
-
-# Display all request types
-if __name__ == "__main__":
-    for request_type in supported_service_requests:
-        supported_service_requests[request_type].display_definition()
-        print("\n" + "-" * 50 + "\n")

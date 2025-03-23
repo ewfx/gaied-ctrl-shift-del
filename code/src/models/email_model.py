@@ -1,8 +1,11 @@
 from typing import List, Optional, Tuple
 
 
+from typing import List, Tuple
+
+
 class Email:
-    """Class representing an email with sender, subject, date, body, and attachments."""
+    """Class representing an email with sender, subject, date, body, and optional attachments."""
 
     def __init__(
         self,
@@ -10,14 +13,15 @@ class Email:
         subject: str,
         date: str,
         body: str,
-        attachments: List[Tuple[str, bytes]],
+        attachments: List[Tuple[str, bytes]] = None,
     ):
         self.sender = sender
         self.subject = subject
         self.date = date
         self.body = body
-        self.attachments=attachments
-        # self.attachments = attachments  # List of tuples (filename, extracted text)
+        self.attachments = (
+            attachments if attachments is not None else []
+        )  # Default to an empty list if None is provided
 
     def __repr__(self):
         return f"Email(from={self.sender}, subject={self.subject}, date={self.date}, attachments={len(self.attachments)})"

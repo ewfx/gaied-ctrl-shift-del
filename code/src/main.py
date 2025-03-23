@@ -23,6 +23,12 @@ email = Email(
     body="Hello, I need to adjust the principal amount of my loan #12345. The adjustment should be effective from 2025-04-01. Reason: Incorrect disbursement. Please approve.",
     attachments=[("loan_details.docx", pdf_bytes)]
 )
+# email = Email(
+#     sender="jane.smith@example.com",
+#     subject="Fee Payment Request - Interest for Loan #98765",
+#     date="2025-03-22",
+#     body="Hello,\n\nI would like to make an interest payment for my loan #98765. The interest amount due is $1,250, and I would like to process the payment on 2025-04-01. Please confirm the payment details.\n\nThank you,\nJane Smith",
+# )
 
 # Process the email
 response = email_processor.process_email(email)

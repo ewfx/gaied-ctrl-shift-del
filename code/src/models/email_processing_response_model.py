@@ -6,6 +6,7 @@ class EmailProcessingResponse:
     def __init__(
         self,
         request_type: str,
+        sub_request_type: str,
         extracted_fields: Dict[str, Any],
         confidence_score: float,
     ):
@@ -13,10 +14,12 @@ class EmailProcessingResponse:
         Response model for processed emails.
 
         :param request_type: Classified request type.
+        :param sub_request_type: Classified sub-request type.
         :param extracted_fields: Dictionary of extracted fields.
         :param confidence_score: Confidence score of the classification.
         """
         self.request_type = request_type
+        self.sub_request_type = sub_request_type
         self.extracted_fields = extracted_fields
         self.confidence_score = confidence_score
 
@@ -37,6 +40,7 @@ class EmailProcessingResponse:
         """
         return {
             "request_type": self.request_type,
+            "sub_request_type": self.sub_request_type,
             "extracted_fields": self.extracted_fields,
             "confidence_score": self.confidence_score,
         }
@@ -56,6 +60,7 @@ class EmailProcessingResponse:
         return (
             f"EmailProcessingResponse: \n"
             f"  request_type={self.request_type},\n\n"
+            f"  sub_request_type={self.sub_request_type},\n\n"
             f"  confidence_score={self.confidence_score:.2f},\n\n"
             f"  extracted_fields={fields_str}\n\n"
             f")"
