@@ -31,5 +31,5 @@ email = Email(
 )
 
 # Process the email
-response = email_processor.process_email(email)
+response = email_processor.process_email(email).flatten()
 print(response)
