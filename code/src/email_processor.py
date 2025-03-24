@@ -5,7 +5,10 @@ from typing import Dict, List, Tuple, Any
 from email_preprocessor import EmailPreprocessor
 from llm_service import HuggingFaceLLM, HuggingFaceModel
 from models.email_model import Email
-from models.email_processing_response_model import EmailProcessingResponse
+from models.email_processing_response_model import (
+    EmailProcessingResponse,
+    ServiceRequestResponse,
+)
 from models.service_request_model import ServiceRequest
 
 
@@ -28,78 +31,86 @@ class EmailProcessor:
     def process_email(self, email: Email) -> EmailProcessingResponse:
         """
         Process an email by first converting it into a structured classification input,
-        then classifying it into a service request type and extracting relevant fields.
+        then classifying it into service request types and extracting relevant fields.
         """
         classification_input = self.preprocessing_service.preprocess_email(email)
-        request_type, sub_request_type, confidence_score = self._classify_email(
+        service_requests = self._classify_email(
             classification_input.subject,
             classification_input.body,
             classification_input.attachments,
         )
 
-        if confidence_score < self.confidence_threshold:
-            logging.warning(
-                "Low confidence classification. Marking as 'Needs Manual Review'."
+        responses = []
+        for request_type, sub_request_type, confidence_score in service_requests:
+            if confidence_score < self.confidence_threshold:
+                continue
+
+            service_request = self.service_request_definitions.get(request_type)
+            if not service_request:
+                responses.append(
+                    ServiceRequestResponse("Unknown", "", {}, confidence_score)
+                )
+                continue
+
+            extracted_fields = self._extract_fields(
+                classification_input.subject,
+                classification_input.body,
+                classification_input.attachments,
+                service_request,
+                sub_request_type,
             )
-            return EmailProcessingResponse(
-                "Needs Manual Review", "", {}, confidence_score
+            responses.append(
+                ServiceRequestResponse(
+                    request_type, sub_request_type, extracted_fields, confidence_score
+                )
             )
 
-        service_request = self.service_request_definitions.get(request_type)
-        if not service_request:
-            return EmailProcessingResponse("Unknown", "", {}, confidence_score)
-
-        extracted_fields = self._extract_fields(
-            classification_input.subject,
-            classification_input.body,
-            classification_input.attachments,
-            service_request,
-            sub_request_type,
-        )
-        return EmailProcessingResponse(
-            request_type, sub_request_type, extracted_fields, confidence_score
-        )
+        return EmailProcessingResponse(responses)
 
     def _classify_email(
         self, email_subject: str, email_body: str, attachments: List[str]
-    ) -> Tuple[str, str, float]:
+    ) -> List[Tuple[str, str, float]]:
         """
-        Classifies an email into a service request type using zero-shot classification.
+        Classifies an email into one or more service request types using zero-shot classification.
         """
         # Combine email body and extracted attachment text
         full_text = f"Subject: {email_subject}\nBody: {email_body}"
 
         labels = [f"{key} Request" for key in self.service_request_definitions.keys()]
         classification_result = self.llm_service.zero_shot_classify(
-            HuggingFaceModel.BART_LARGE_MNLI, full_text, labels
+            HuggingFaceModel.MORITZ_LAURER_DEBERT, full_text, labels, True
         )
 
         if "labels" not in classification_result or not classification_result["labels"]:
-            return "Unclassified", "", 0.0
+            return [("Unclassified", "", 0.0)]
 
-        best_match_label = classification_result["labels"][0]
-        confidence_score = classification_result["scores"][0]
-        best_request_key = best_match_label.rsplit(" Request", 1)[0]
+        service_requests = []
+        for label, score in zip(
+            classification_result["labels"], classification_result["scores"]
+        ):
+            best_request_key = label.rsplit(" Request", 1)[0]
 
-        sub_request_key = ""
-        if best_request_key in self.service_request_definitions:
-            sub_labels = [
-                f"{key} Request"
-                for key in self.service_request_definitions[
-                    best_request_key
-                ].sub_service_requests.keys()
-            ]
-            sub_classification_result = self.llm_service.zero_shot_classify(
-                HuggingFaceModel.BART_LARGE_MNLI, full_text, sub_labels
-            )
-            if (
-                "labels" in sub_classification_result
-                and sub_classification_result["labels"]
-            ):
-                sub_best_match_label = sub_classification_result["labels"][0]
-                sub_request_key = sub_best_match_label.rsplit(" Request", 1)[0]
+            sub_request_key = ""
+            if best_request_key in self.service_request_definitions:
+                sub_labels = [
+                    f"{key} Request"
+                    for key in self.service_request_definitions[
+                        best_request_key
+                    ].sub_service_requests.keys()
+                ]
+                sub_classification_result = self.llm_service.zero_shot_classify(
+                    HuggingFaceModel.BART_LARGE_MNLI, full_text, sub_labels
+                )
+                if (
+                    "labels" in sub_classification_result
+                    and sub_classification_result["labels"]
+                ):
+                    sub_best_match_label = sub_classification_result["labels"][0]
+                    sub_request_key = sub_best_match_label.rsplit(" Request", 1)[0]
 
-        return best_request_key, sub_request_key, confidence_score
+            service_requests.append((best_request_key, sub_request_key, score))
+
+        return service_requests
 
     def _extract_fields(
         self,
@@ -121,7 +132,7 @@ class EmailProcessor:
             return {}
 
         prompt = f"""
-        Extract the following fields from the email subject and body, considering different possible names and contexts:
+        This is a customer email for a {service_request.request_type} request to a bank. Extract the following fields from the email subject and body, considering different possible names and contexts:
         {', '.join(fields_to_extract)}
 
         Subject: {email_subject}
