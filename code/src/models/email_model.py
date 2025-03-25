@@ -1,7 +1,4 @@
-from typing import List, Optional, Tuple
-
-
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 class Email:
@@ -13,18 +10,21 @@ class Email:
         subject: str,
         date: str,
         body: str,
-        attachments: List[Tuple[str, bytes]] = None,
+        attachments: Optional[List[Tuple[str, bytes]]] = None,
+        thread_id: Optional[str] = None,
+        sender_role: str = "customer",  # Can be "customer" or "support"
     ):
         self.sender = sender
         self.subject = subject
         self.date = date
         self.body = body
-        self.attachments = (
-            attachments if attachments is not None else []
-        )  # Default to an empty list if None is provided
+        self.attachments = attachments if attachments is not None else []
+        self.thread_id = thread_id  # Unique thread ID for grouping related emails
+        self.sender_role = sender_role  # "customer" or "support"
 
     def __repr__(self):
-        return f"Email(from={self.sender}, subject={self.subject}, date={self.date}, attachments={len(self.attachments)})"
+        return f"Email(from={self.sender}, subject={self.subject}, date={self.date}, role={self.sender_role}, attachments={len(self.attachments)})"
+
 
     # def print_email(self):
     #     """Nicely formats and prints the email details."""
