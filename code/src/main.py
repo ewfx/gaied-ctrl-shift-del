@@ -8,7 +8,7 @@ from supported_service_requests import supported_service_requests
 api_key = "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"
 llm = HuggingFaceLLM(api_key)
 email_processor = EmailProcessor(
-    llm, supported_service_requests, confidence_threshold=0.3
+    llm, supported_service_requests, confidence_threshold=0.5
 )
 
 # Simulating a PDF attachment (replace with actual file bytes)
@@ -18,7 +18,7 @@ with open("./artifacts/Loan_Adjustment_Request.docx", "rb") as file:
 # Create an email object with three service requests
 email = Email(
     sender="john.doe@example.com",
-    subject="Adjustment Request for Loan #12345, Fee Payment, and Money Movement",
+    subject="Request for Loan #12345",
     date="2025-03-22",
     body=(
         "Hello, I need to adjust the principal amount of my loan #12345. "
@@ -31,5 +31,5 @@ email = Email(
 )
 
 # Process the email
-response = email_processor.process_email(email).flatten()
+response = email_processor.process_email(email)
 print(response)

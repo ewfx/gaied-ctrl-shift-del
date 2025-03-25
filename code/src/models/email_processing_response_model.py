@@ -24,20 +24,3 @@ class EmailProcessingResponse:
 
     def __repr__(self) -> str:
         return f"EmailProcessingResponse(\n  responses: [\n    " + ",\n    ".join(repr(response) for response in self.responses) + "\n  ]\n)"
-
-    def flatten(self) -> List[ServiceRequestResponse]:
-        """
-        Flatten the responses by creating separate entries for each subtype.
-        """
-        flattened_responses = []
-        for response in self.responses:
-            if response.sub_request_type:
-                flattened_responses.append(ServiceRequestResponse(
-                    response.request_type,
-                    response.sub_request_type,
-                    response.fields,
-                    response.confidence_score
-                ))
-            else:
-                flattened_responses.append(response)
-        return flattened_responses
