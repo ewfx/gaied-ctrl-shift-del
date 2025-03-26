@@ -12,6 +12,30 @@ supported_service_requests = {
             "Effective Date": "Required",  # Date when adjustment takes effect
         },
     ),
+    "Enquiry": ServiceRequest(
+        request_type="Enquiry",
+        description="Request to provide information ,clarification or explanation related to accounts,loans and interest rates",
+        dynamic_fields={
+            "Enquiry Reason": "Required",
+        },
+        sub_service_requests={
+            "Balance Enquiry": ServiceRequest(
+                request_type="Balance Enquiry",
+                description="Request to provide information about the account balance",
+                dynamic_fields={
+                    "Account Type": "Required",  # Type of fee being reallocated
+                },
+            ),
+            "Loan Information":ServiceRequest(
+                request_type="Loan Information",
+                description="Request to provide information about type of loan provided",
+                dynamic_fields={
+                    "Loan Type": "Required",  # Type of fee being reallocated
+                    "Planned Date": "Required",
+                },
+            ),
+        }
+    ),
     "AU Transfer": ServiceRequest(
         request_type="AU Transfer",
         description="Request to transfer an asset unit.",
