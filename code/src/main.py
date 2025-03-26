@@ -54,7 +54,7 @@ email1 = Email(
         "Additionally, I would like to make a fee payment for my loan. The fee amount due is $1,250, "
         "and I would like to process the payment on 2025-04-01. Please confirm the payment.\n\n"
     ),
-    attachments=[],
+    attachments=['Loan_Adjustment_Request.docx'],
     thread_id="12345",
     sender_role="customer",
 )

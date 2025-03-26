@@ -10,7 +10,7 @@ class Email:
         subject: str,
         date: str,
         body: str,
-        attachments: Optional[List[Tuple[str, bytes]]] = None,
+        attachments: List[str] = None,
         thread_id: Optional[str] = None,
         sender_role: str = "customer",  # Can be "customer" or "support"
     ):
@@ -24,7 +24,6 @@ class Email:
 
     def __repr__(self):
         return f"Email(from={self.sender}, subject={self.subject}, date={self.date}, role={self.sender_role}, attachments={len(self.attachments)})"
-
 
     # def print_email(self):
     #     """Nicely formats and prints the email details."""

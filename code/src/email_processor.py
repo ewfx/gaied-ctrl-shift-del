@@ -175,7 +175,7 @@ class EmailProcessor:
                 continue
 
             prompt = f"""
-            Extract the following fields from this customer email:
+            Extract the following fields from this customer email to bank support:
             {', '.join(fields_to_extract)}
             
             Subject: {email_subject}
@@ -186,7 +186,7 @@ class EmailProcessor:
             Attachments:
             {attachments}
             
-            Return only a valid JSON object with no extra text.
+            If a field is present in both email body and attachment, prioritize the one in attachment. Return only a valid JSON object with no extra text.
             """
 
             response = self.llm_service.generate_response(
