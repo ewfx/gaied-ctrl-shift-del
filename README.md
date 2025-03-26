@@ -45,6 +45,8 @@ This project automates **email classification and data extraction** using **Gene
 - Built a **robust failure-handling mechanism**, ensuring reliable processing even in cases of API failures or unclassified emails.
 - Integrated **duplicate detection**, preventing redundant service requests from being generated for repeated emails.
 - Developed a **Flask-based UI**, allowing users to interact with the classification system in real time.
+- Used API keys generated from - https://huggingface.co/
+- **NOTE: API Keys might expire after a specific period of time/no.of requests. Generate new api key if you are getting 401 error**
 
 ## 🚧 Challenges We Faced
 
