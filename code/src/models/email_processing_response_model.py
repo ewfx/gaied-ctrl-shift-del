@@ -28,14 +28,15 @@ class EmailProcessingResponse:
     ):
         self.status = status
         self.responses = responses or []
-        self.reasonForNotProcessing = reasonForNotProcessing
+        self.reasonForNotProcessing = reasonForNotProcessing if status in ["skipped", "failed"] else None
 
     def __repr__(self) -> str:
         response_str = ",\n    ".join(repr(response) for response in self.responses) if self.responses else "[]"
+        reason_str = f"  reasonForNotProcessing: '{self.reasonForNotProcessing}',\n" if self.reasonForNotProcessing else ""
         return (
             f"EmailProcessingResponse(\n"
             f"  status: '{self.status}',\n"
-            f"  reasonForNotProcessing: '{self.reasonForNotProcessing}',\n"
+            f"{reason_str}"
             f"  responses: [\n    {response_str}\n  ]\n"
             f")\n"
         )
