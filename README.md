@@ -31,7 +31,7 @@ Manual triaging of emails in commercial banking loan servicing is slow and error
 This project automates **email classification and data extraction** using **Generative AI (LLMs)** to improve efficiency, accuracy, and turnaround time while minimizing manual effort. The solution:
 
 - Classifies emails into predefined **request types** and **sub-request types**.
-- Extracts configurable **key attributes** from emails and attachments.
+- Extracts configurable **key attributes** from emails and attachments of types- ".pdf", ".png", ".jpg", ".jpeg",".xls", ".xlsx",".docx".
 - Detects **multiple request types** within a single email and determines the primary intent.
 - Implements **priority-based extraction** to prioritize email content over attachments.
 - Identifies and flags **duplicate emails** to prevent redundant service requests.
@@ -55,10 +55,6 @@ This project automates **email classification and data extraction** using **Gene
 - Minimizing false positives in **duplicate detection**.
 
 ## ▶️ How to Run
-
-UI:
-
-Backend:
 
 1. Clone the repository:
    ```bash
