@@ -6,13 +6,14 @@ from models.email_model import Email
 from models.email_classification_input_model import EmailClassificationInput
 import email.utils
 
+
 class EmailPreprocessor:
     """
     Preprocesses emails and converts them into a structured classification input.
     """
 
     def __init__(self):
-        self.attachment_processor = AttachmentProcessor()
+        self.attachment_processor = AttachmentProcessor(folder="./artifacts")
 
     def preprocess_email(self, email: Email) -> EmailClassificationInput:
         """
@@ -22,8 +23,10 @@ class EmailPreprocessor:
         cleaned_body = self.clean_text(email.body)
         cleaned_sender = self.extract_email_address(email.sender)
         extracted_attachments = []
-        for file_name, file_bytes in email.attachments:
-            extracted_text = self.attachment_processor.extract_text_from_attachment(file_name, file_bytes)
+        for file_name in email.attachments:
+            extracted_text = self.attachment_processor.extract_text_from_attachment(
+                file_name
+            )
             extracted_attachments.append(extracted_text)
 
         return EmailClassificationInput(
@@ -32,7 +35,7 @@ class EmailPreprocessor:
             sender=cleaned_sender,
             date=email.date,
             attachments=extracted_attachments,  # Store extracted text separately
-            metadata={}  # Can be used for additional context
+            metadata={},  # Can be used for additional context
         )
 
     def clean_text(self, text: str) -> str:
@@ -47,7 +50,7 @@ class EmailPreprocessor:
 
         # Remove extra spaces and strip
         return re.sub(r"\s+", " ", text).strip()
-    
+
     def extract_email_address(self, sender: str) -> str:
         parsed = email.utils.parseaddr(sender)
         return parsed[1]  # Extracts only the email address
