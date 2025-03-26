@@ -4,7 +4,7 @@ from email_service_manager import EmailServiceManager
 from email_processor import EmailProcessor
 from llm_service import HuggingFaceLLM
 from supported_service_requests import supported_service_requests
-from Email_Threads import email_threads
+from emails.Email_Threads import email_threads
 
 app = Flask(__name__)
 
@@ -33,7 +33,7 @@ def call_application():
         return jsonify({"error": "Missing scenario_id"}), 400
 
     # Fetch filtered email threads based on scenario_id
-    filtered_threads = email_threads[scenario_id]
+    filtered_threads = email_threads.get(f"Thread{scenario_id}")
 
     if not filtered_threads:
         return jsonify({"error": f"No emails found for scenario {scenario_id}"}), 404

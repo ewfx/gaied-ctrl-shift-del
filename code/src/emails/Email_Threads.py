@@ -1,52 +1,50 @@
 from models.email_model import Email
 
-email_threads = { 
-    "Thread1" : [
-    #scenario-2
-   Email (
-    sender="customer@example.com",
-    subject="Request for Adjustment and AU Transfer",
-    date="2025-03-22",
-    body=(
-        "Dear Support Team,\n\n"
-        "I would like to request two actions related to my loan account:\n\n"
-        
-        "1. **Adjustment Request**\n"
-        "   I need an adjustment of $2,500 due to an incorrect charge applied on March 15, 2025. "
-        "The effective date for this adjustment should be March 20, 2025. The adjustment reason is an "
-        "overcharge due to a system error.\n\n"
-        
-        "2. **AU Transfer Request**\n"
-        "   Please transfer $5,000 from Asset Unit 'AU-12345' to 'AU-67890'. This transfer should take "
-        "effect immediately.\n\n"
-        
-        "I have attached the supporting documents for your reference. Let me know if you require any additional information.\n\n"
-        "Best regards,\n"
-        "[Customer Name]"
-    ),
-    email_id="102",
-    attachments=["adjustment_request.pdf", "au_transfer_details.pdf"],
-    thread_id="1010",
-    sender_role="customer",
-),
-],
+email_threads = {
+    "Thread1": [
+        # scenario-2
+        Email(
+            sender="customer@example.com",
+            subject="Request for Adjustment and AU Transfer",
+            date="2025-03-22",
+            body=(
+                "Dear Support Team,\n\n"
+                "I would like to request two actions related to my loan account:\n\n"
+                "1. **Adjustment Request**\n"
+                "   I need an adjustment of $2,500 due to an incorrect charge applied on March 15, 2025. "
+                "The effective date for this adjustment should be March 20, 2025. The adjustment reason is an "
+                "overcharge due to a system error.\n\n"
+                "2. **AU Transfer Request**\n"
+                "   Please transfer $5,000 from Asset Unit 'AU-12345' to 'AU-67890'. This transfer should take "
+                "effect immediately.\n\n"
+                "I have attached the supporting documents for your reference. Let me know if you require any additional information.\n\n"
+                "Best regards,\n"
+                "[Customer Name]"
+            ),
+            email_id="102",
+            attachments=["adjustment_request.pdf", "au_transfer_details.pdf"],
+            thread_id="1010",
+            sender_role="customer",
+        ),
+    ],
     "Thread2": [
         Email(
             sender="customer@example.com",
             subject="Commitment Change Request",
             date="2025-03-22",
-            body=("Hello,I need to make a payment for an ongoing fee related to my loan."
-                  " The payment details, including the due date and fee period, are attached for your reference. "
-                  "Please process the payment accordingly and confirm once completed.Let me know if you need any additional"
-                   " information.Best regards,[Customer Name]"),
+            body=(
+                "Hello,I need to make a payment for an ongoing fee related to my loan."
+                " The payment details, including the due date and fee period, are attached for your reference. "
+                "Please process the payment accordingly and confirm once completed.Let me know if you need any additional"
+                " information.Best regards,[Customer Name]"
+            ),
             email_id="103",
             attachments=["fee_payment_details.pdf"],
             thread_id="1008",
             sender_role="customer",
-   ),
+        ),
     ],
-
-#scenario -- enquiry about a loan
+    # scenario -- enquiry about a loan
     "Thread3": [
         # Loan Information Request
         Email(
@@ -68,7 +66,7 @@ email_threads = {
             sender_role="customer",
         ),
     ],
-    multiple emails- single thread
+    # multiple emails- single thread
     "Thread4": [
         # Money Movement - Outbound
         Email(
@@ -149,5 +147,3 @@ email_threads = {
         ),
     ],
 }
-
-
