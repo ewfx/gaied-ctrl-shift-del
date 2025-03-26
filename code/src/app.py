@@ -8,7 +8,7 @@ from emails.Email_Threads import email_threads
 
 app = Flask(__name__)
 
-API_KEY = ""
+API_KEY = "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"
 if not API_KEY:
     raise ValueError(
         "API key not set. Please configure HF_API_KEY as an environment variable."
