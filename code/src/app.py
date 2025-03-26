@@ -8,7 +8,7 @@ from Email_Threads import email_threads
 
 app = Flask(__name__)
 
-API_KEY = ""
+API_KEY = "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"
 if not API_KEY:
     raise ValueError(
         "API key not set. Please configure HF_API_KEY as an environment variable."
@@ -33,7 +33,7 @@ def call_application():
         return jsonify({"error": "Missing scenario_id"}), 400
 
     # Fetch filtered email threads based on scenario_id
-    filtered_threads = email_threads.get(scenario_id, [])
+    filtered_threads = email_threads
 
     if not filtered_threads:
         return jsonify({"error": f"No emails found for scenario {scenario_id}"}), 404
@@ -52,11 +52,7 @@ def call_application():
 
 @app.route("/api/get_configured_service_requests", methods=["GET"])
 def get_supported_service_requests():
-    json_output = json.dumps(
-        {key: value.to_dict() for key, value in supported_service_requests.items()},
-        indent=4,
-    )
-    return jsonify({"request_types": json_output})
+    return jsonify({"request_types": {key: value.to_dict() for key, value in supported_service_requests.items()}})
 
 
 # Serve the HTML file
