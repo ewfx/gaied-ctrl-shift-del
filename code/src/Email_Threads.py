@@ -8,6 +8,7 @@ email_threads = [
        date="2025-03-22",
        body=("Hello,I would like to request a change to my loan commitment. Due to recent financial adjustments, I need to decrease the commitment amount. I’ve attached the relevant details for your reference.Please review and let me know if any further information is required.Best regards,[Customer Name]"),
        attachments=["commitment_change_details.pdf"],
+       email_id="101",
        thread_id="1008",
        sender_role="customer",
    ),]

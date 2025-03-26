@@ -15,7 +15,9 @@ class EmailServiceManager:
         # **Case 2: Support Email - No Need to Process**
         if email.sender_role == "support":
             return EmailProcessingResponse(
-                status="skipped", reasonForNotProcessing="Support email. No processing required."
+                email=email,
+                status="skipped",
+                reasonForFailure="Support email. No processing required.",
             )
 
         self.thread_manager.add_email(email)  # Add email to thread
@@ -29,7 +31,9 @@ class EmailServiceManager:
 
         if not last_email:
             return EmailProcessingResponse(
-                status="skipped", reasonForNotProcessing="No open customer request."
+                email=email,
+                status="skipped",
+                reasonForFailure="No open customer request.",
             )
 
         # **Case 1: Duplicate Request**
@@ -37,7 +41,9 @@ class EmailServiceManager:
             last_email.body, past_customer_emails
         ):
             return EmailProcessingResponse(
-                status="skipped", reasonForNotProcessing="Duplicate customer request."
+                email=email,
+                status="skipped",
+                reasonForFailure="Duplicate customer request.",
             )
 
         # **Process the last unreplied customer email**

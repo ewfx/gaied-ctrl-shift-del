@@ -1,11 +1,22 @@
 {
     "configurations": [
+        // {
+        //     "name": "Python: Run main.py",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}/code/src/main.py",
+        //     "python": "${workspaceFolder}/venv/Scripts/python"
+        // },
         {
-            "name": "Python: Run main.py",
+            "name": "Python: Run Flask App",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/code/src/main.py",
-            "python": "${workspaceFolder}/venv/Scripts/python"
+            "program": "${workspaceFolder}/code/src/app.py",
+            "python": "${workspaceFolder}/venv/Scripts/python",
+            "env": {
+                "FLASK_APP": "app.py",
+                "FLASK_ENV": "development"
+            }
         }
     ]
 }

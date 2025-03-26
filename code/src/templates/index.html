@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gen AI Email Orchestrator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#FFFFFF] flex items-center justify-center min-h-screen">
+
+    <div class="bg-[#F4F0EE] p-8 rounded-lg shadow-lg w-[90vw] h-[90vh] text-center text-[#141414] flex flex-col">
+        <h1 class="text-4xl font-bold mb-6 text-[#D71E27]">Gen AI Email Orchestrator</h1>
+        
+        <button id="callButton" class="bg-[#FFCD41] text-[#141414] font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-yellow-500 transition text-lg">
+            Process Emails
+        </button>
+
+        <div id="loading" class="hidden mt-4 text-[#141414] font-medium text-lg">Processing...</div>
+
+        <pre id="responseField" class="bg-white p-6 rounded-lg mt-6 text-left text-md text-[#141414] overflow-auto flex-grow max-h-full border border-[#D71E27]"></pre>
+    </div>
+
+    <script>
+        document.getElementById('callButton').addEventListener('click', function() {
+            const button = document.getElementById('callButton');
+            const responseField = document.getElementById('responseField');
+            const loadingText = document.getElementById('loading');
+
+            // Show loading text and disable button
+            loadingText.classList.remove("hidden");
+            button.disabled = true;
+            button.classList.add("opacity-50");
+
+            fetch('/api/call_application', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                // body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                responseField.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                responseField.textContent = "Error: " + error;
+            })
+            .finally(() => {
+                // Hide loading text and re-enable button
+                loadingText.classList.add("hidden");
+                button.disabled = false;
+                button.classList.remove("opacity-50");
+            });
+        });
+    </script>
+
+</body>
+</html>

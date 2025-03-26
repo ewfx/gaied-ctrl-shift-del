@@ -42,7 +42,7 @@ class EmailProcessor:
 
         # **Check for API Failure Case**
         if service_requests and service_requests[0][0] == "API Failure":
-            return EmailProcessingResponse(
+            return EmailProcessingResponse(email=email,
                 status="failed", reasonForNotProcessing="API failure during classification."
             )
 
@@ -74,7 +74,7 @@ class EmailProcessor:
             return EmailProcessingResponse(
                 status="unclassified", reasonForNotProcessing="No valid classification found."
             )   
-        return EmailProcessingResponse(responses=responses,status="processed")
+        return EmailProcessingResponse(email=email,responses=responses,status="processed")
 
     def _classify_email(
         self, email_subject: str, email_body: str, attachments: List[str]
