@@ -80,40 +80,6 @@ supported_service_requests = {
             ),
         },
     ),
-    "Commitment Change": ServiceRequest(
-        request_type="Commitment Change",
-        description="Request to change commitment terms for a loan.",
-        dynamic_fields={
-            "Commitment ID": "Required",  # Unique identifier for commitment
-            "Change Reason": "Required",  # Justification for the change
-        },
-        sub_service_requests={
-            "Cashless Roll": ServiceRequest(
-                request_type="Cashless Roll",
-                description="Extend commitment without new cash movement.",
-                dynamic_fields={
-                    "New Expiry Date": "Required",  # Extension date
-                    "Justification": "Required",
-                },
-            ),
-            "Decrease": ServiceRequest(
-                request_type="Decrease",
-                description="Decrease the commitment amount.",
-                dynamic_fields={
-                    "New Commitment Amount": "Required",
-                    "Effective Date": "Required",
-                },
-            ),
-            "Increase": ServiceRequest(
-                request_type="Increase",
-                description="Increase the commitment amount.",
-                dynamic_fields={
-                    "New Commitment Amount": "Required",
-                    "Funding Source": "Required",  # Source of additional funds
-                },
-            ),
-        },
-    ),
     "Fee Payment": ServiceRequest(
         request_type="Fee Payment",
         description="Request for fee-related payments.",
