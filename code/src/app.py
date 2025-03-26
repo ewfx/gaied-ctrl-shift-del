@@ -8,7 +8,7 @@ from Email_Threads import email_threads
 
 app = Flask(__name__)
 
-API_KEY = "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"
+API_KEY = ""
 if not API_KEY:
     raise ValueError(
         "API key not set. Please configure HF_API_KEY as an environment variable."
@@ -33,7 +33,7 @@ def call_application():
         return jsonify({"error": "Missing scenario_id"}), 400
 
     # Fetch filtered email threads based on scenario_id
-    filtered_threads = email_threads
+    filtered_threads = email_threads[scenario_id]
 
     if not filtered_threads:
         return jsonify({"error": f"No emails found for scenario {scenario_id}"}), 404
