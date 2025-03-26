@@ -71,6 +71,9 @@ This project automates **email classification and data extraction** using **Gene
    python app.py
    ```
 4. Open the localhost URL in the output
+   ```bash
+   http://127.0.0.1:5000/
+   ```
 
 ## 🛠 Tech Stack
 
