@@ -20,7 +20,10 @@ Our project automates email classification and data extraction using Generative 
 
 - [Live Demo](#) (if applicable)
 - [Video Demo](#) (if applicable)
-- 📸 Screenshots:
+- 📸 Screenshots:![image](https://github.com/user-attachments/assets/a753b286-8799-4985-8778-c6272abd7e34)![image](https://github.com/user-attachments/assets/f3765225-0396-4c74-94f7-61cca0c427a0)![image](https://github.com/user-attachments/assets/ee5c7fa1-f1f3-40ae-aa8a-98d0e60a7541)
+
+
+
 
 ## 💡 Inspiration
 
