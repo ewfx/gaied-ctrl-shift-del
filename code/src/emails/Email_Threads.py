@@ -159,5 +159,3 @@ email_threads = {
         ),
     ],
 }
-
-
