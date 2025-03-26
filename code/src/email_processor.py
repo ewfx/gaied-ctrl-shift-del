@@ -40,6 +40,12 @@ class EmailProcessor:
             classification_input.attachments,
         )
 
+        # **Check for API Failure Case**
+        if service_requests and service_requests[0][0] == "API Failure":
+            return EmailProcessingResponse(
+                status="failed", reasonForNotProcessing="API failure during classification."
+            )
+
         responses = []
         for request_type, sub_service_requests, confidence_score in service_requests:
             service_request = self.service_request_definitions.get(request_type)
@@ -63,8 +69,12 @@ class EmailProcessor:
                         request_type, sub_request_type, fields, sub_request_score
                     )
                 )
-
-        return EmailProcessingResponse(responses)
+         # **Return "Unclassified" if no valid responses exist**
+        if not responses:
+            return EmailProcessingResponse(
+                status="unclassified", reasonForNotProcessing="No valid classification found."
+            )   
+        return EmailProcessingResponse(responses=responses,status="processed")
 
     def _classify_email(
         self, email_subject: str, email_body: str, attachments: List[str]
@@ -79,6 +89,12 @@ class EmailProcessor:
             HuggingFaceModel.MORITZ_LAURER_DEBERT, full_text, labels, True
         )
 
+        # **Handle API Failure Case**
+        if "error" in classification_result:
+            logging.error(f"LLM API failure: {classification_result['error']}")
+            return [("API Failure", [], 0.0)]  # Mark as API failure explicitly
+
+        # **Handle Unclassified Cases**
         if "labels" not in classification_result or not classification_result["labels"]:
             return [("Unclassified", [], 0.0)]
 
@@ -105,6 +121,16 @@ class EmailProcessor:
                         sub_labels,
                         True,
                     )
+
+                    # **Handle Sub-Classification API Failure**
+                    if "error" in sub_classification_result:
+                        logging.error(
+                            f"LLM API failure in sub-classification: {sub_classification_result['error']}"
+                        )
+                        return [
+                            ("API Failure", [], 0.0)
+                        ]  # Ensure consistent failure handling
+
                     if (
                         "labels" in sub_classification_result
                         and sub_classification_result["labels"]
@@ -120,6 +146,7 @@ class EmailProcessor:
                                 sub_service_requests.append(
                                     (sub_best_match_label, sub_score)
                                 )
+
             service_requests.append((best_request_key, sub_service_requests, score))
 
         return service_requests

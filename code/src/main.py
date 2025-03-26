@@ -7,7 +7,7 @@ from supported_service_requests import supported_service_requests
 from Email_Threads import email_threads
 
 # Initialize the LLM client with your Hugging Face API key
-api_key = "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"
+api_key = ""
 llm = HuggingFaceLLM(api_key)
 email_processor = EmailProcessor(
     llm_service=llm,
