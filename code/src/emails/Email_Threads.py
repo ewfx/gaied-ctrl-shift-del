@@ -1,8 +1,7 @@
 from models.email_model import Email
 
 email_threads = { 
-     "Thread1" : [
-     #scenario-2
+     "Thread2" : [
     Email (
      sender="customer@example.com",
      subject="Request for Adjustment and AU Transfer",
@@ -30,7 +29,7 @@ email_threads = {
      sender_role="customer",
  ),
  ],
-     "Thread2": [
+     "Thread1": [
          Email(
              sender="customer@example.com",
              subject="Commitment Change Request",
@@ -110,7 +109,7 @@ email_threads = {
         # Duplicate Requests in a Single Thread
         Email(
             sender="customer@example.com",
-            subject="Payment & Adjustment Request",
+            subject="Adjustment Request",
             date="2025-03-25",
             body=(
                 "Dear Support Team, "
@@ -123,12 +122,12 @@ email_threads = {
             ),
             email_id="107",
             attachments=["adjustment_proof.pdf"],
-            thread_id="1014",
+            thread_id="1016",
             sender_role="customer",
         ),
          Email(
             sender="support@example.com",
-            subject="RE: Payment & Adjustment Request",
+            subject="RE: Adjustment Request",
             date="2025-03-25",
             body=(
                 "Dear Customer"
@@ -136,25 +135,25 @@ email_threads = {
             ),
             email_id="109",
             attachments=[],
-            thread_id="1014",
+            thread_id="1016",
             sender_role="support",
         ),
 
         Email(
             sender="customer@example.com",
-            subject="Follow-up: Payment & Adjustment Request",
+            subject="Follow-up:Adjustment Request",
             date="2025-03-27",
             body=(
-                "Dear Support Team, "
-                "I am following up on my request regarding the adjustment of $1,200 and the payment of $800. "
-                "Could you please provide an update on the processing status? "
-                "I appreciate your prompt response. "
+                "this is a follow up mail for the following action on my account: "
+                "I need an adjustment of $1,200 for an incorrect charge applied on March 10, 2025. "
+                "The effective date March 15, 2025 for adjustment "
+                "I have attached supporting documents for your reference. let me know on the further details "
                 "Best regards, "
                 "[Customer Name]"
             ),
             email_id="110",
             attachments=[],
-            thread_id="1014",
+            thread_id="1016",
             sender_role="customer",
         ),
     ],
