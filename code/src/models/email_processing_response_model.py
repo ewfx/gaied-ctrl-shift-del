@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 class ServiceRequestResponse:
     def __init__(self, request_type: str, sub_request_type: str, fields: Dict[str, Any], confidence_score: float):
@@ -18,9 +18,24 @@ class ServiceRequestResponse:
             f")\n"
         )
 
+
 class EmailProcessingResponse:
-    def __init__(self, responses: List[ServiceRequestResponse]):
-        self.responses = responses
+    def __init__(
+        self,
+        status: str,  # "processed", "skipped", or "failed"
+        responses: Optional[List[ServiceRequestResponse]] = None,
+        reasonForNotProcessing: Optional[str] = None  # Only used if status is "skipped" or "failed"
+    ):
+        self.status = status
+        self.responses = responses or []
+        self.reasonForNotProcessing = reasonForNotProcessing
 
     def __repr__(self) -> str:
-        return f"EmailProcessingResponse(\n  responses: [\n    " + ",\n    ".join(repr(response) for response in self.responses) + "\n  ]\n)"
+        response_str = ",\n    ".join(repr(response) for response in self.responses) if self.responses else "[]"
+        return (
+            f"EmailProcessingResponse(\n"
+            f"  status: '{self.status}',\n"
+            f"  reasonForNotProcessing: '{self.reasonForNotProcessing}',\n"
+            f"  responses: [\n    {response_str}\n  ]\n"
+            f")\n"
+        )

@@ -2,11 +2,13 @@ import requests
 from enum import Enum
 from time import sleep
 
+
 class HuggingFaceModel(Enum):
     BART_LARGE_MNLI = "facebook/bart-large-mnli"
     MORITZ_LAURER_DEBERT = "MoritzLaurer/mDeBERTa-v3-base-mnli-xnli"
     MSFT_DEBERTA = "microsoft/deberta-v3-large"
     MISTRAL_7B_INSTRUCT = "mistralai/Mistral-7B-Instruct-v0.1"
+
 
 class HuggingFaceLLM:
     BASE_URL = "https://api-inference.huggingface.co/models/"
@@ -15,7 +17,11 @@ class HuggingFaceLLM:
         """
         Initialize the Hugging Face LLM client.
         :param api_key: Hugging Face API Key.
+        :raises ValueError: If the API key is not provided.
         """
+        if not api_key:
+            raise ValueError("API key is required for Hugging Face LLM access.")
+
         self.api_key = api_key
         self.headers = {"Authorization": f"Bearer {self.api_key}"}
 
@@ -26,11 +32,14 @@ class HuggingFaceLLM:
         for attempt in range(max_retries):
             try:
                 response = requests.post(url, headers=self.headers, json=payload)
+                if response.status_code == 401:  # Handle unauthorized errors
+                    raise ValueError("Invalid API key. Authentication failed.")
+
                 response.raise_for_status()
                 return response
             except requests.exceptions.RequestException as e:
                 if attempt < max_retries - 1:
-                    sleep(2 ** attempt)  # Exponential backoff
+                    sleep(2**attempt)  # Exponential backoff
                     continue
                 return f"Request failed after {max_retries} attempts: {str(e)}"
 
@@ -81,7 +90,7 @@ class HuggingFaceLLM:
         :param text: The input text to classify.
         :param labels: A list of candidate labels.
         :param multi_label: Whether to allow multiple labels to be assigned.
-        :return: Classification result with labels and scores.
+        :return: Classification result with labels and scores, or an error response.
         """
         url = self.BASE_URL + model.value
         payload = {
@@ -91,12 +100,12 @@ class HuggingFaceLLM:
 
         response = self._request_with_retries(url, payload)
 
-        if isinstance(response, str):  # Check if response is an error message
-            return response
+        if isinstance(response, str):  # Request failed after retries
+            return {"error": response}
 
         try:
             return response.json()
         except requests.exceptions.RequestException as e:
-            return f"Request failed: {str(e)}"
+            return {"error": f"Request failed: {str(e)}"}
         except KeyError:
-            return f"Unexpected response format: {response.text}"
+            return {"error": f"Unexpected response format: {response.text}"}

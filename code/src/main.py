@@ -6,7 +6,7 @@ from models.email_model import Email
 from supported_service_requests import supported_service_requests
 
 # Initialize the LLM client with your Hugging Face API key
-api_key = "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"
+api_key = ""
 llm = HuggingFaceLLM(api_key)
 email_processor = EmailProcessor(
     llm_service=llm,

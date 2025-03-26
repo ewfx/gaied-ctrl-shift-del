@@ -13,7 +13,7 @@ class EmailThreadManager:
 
     def add_email(self, email: Email):
         """Adds an email to its thread based on thread_id."""
-        thread_id = email.thread_id or email.sender  # Use sender if no thread_id
+        thread_id = email.thread_id
         if thread_id not in self.threads:
             self.threads[thread_id] = []
         self.threads[thread_id].append(email)
