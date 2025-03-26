@@ -5,50 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gen AI Email Orchestrator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .json-key { color: #D71E27; font-weight: bold; }
+        .json-value { color: #0074D9; }
+        .json-string { color: #2ECC40; }
+    </style>
 </head>
 <body class="bg-[#FFFFFF] flex items-center justify-center min-h-screen">
 
     <div class="bg-[#F4F0EE] p-8 rounded-lg shadow-lg w-[90vw] h-[90vh] text-center text-[#141414] flex flex-col">
         <h1 class="text-4xl font-bold mb-6 text-[#D71E27]">Gen AI Email Orchestrator</h1>
         
+        <!-- Dropdown for Scenario Selection -->
+        <label for="scenarioSelect" class="text-lg font-semibold mb-2">Select Scenario:</label>
+        <select id="scenarioSelect" class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-lg mb-4">
+            <option value="1">Scenario 1</option>
+            <option value="2">Scenario 2</option>
+            <option value="3">Scenario 3</option>
+            <option value="4">Scenario 4</option>
+            <option value="5">Scenario 5</option>
+        </select>
+
         <button id="callButton" class="bg-[#FFCD41] text-[#141414] font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-yellow-500 transition text-lg">
-            Process Emails
+            Process Scenario
+        </button>
+
+        <button id="callServiceRequests" class="bg-[#FFCD41] text-[#141414] font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-yellow-500 transition text-lg mt-4">
+            Get Configured Service Request Types
         </button>
 
         <div id="loading" class="hidden mt-4 text-[#141414] font-medium text-lg">Processing...</div>
 
-        <pre id="responseField" class="bg-white p-6 rounded-lg mt-6 text-left text-md text-[#141414] overflow-auto flex-grow max-h-full border border-[#D71E27]"></pre>
+        <!-- Flex container for the two output fields -->
+        <div id="emailResponseContainer" class="flex flex-grow mt-6 space-x-4 w-full">
+            <!-- Emails Field -->
+            <div id="emailsField" class="bg-white p-4 rounded-lg w-1/2 text-left text-md text-[#141414] overflow-auto max-h-full border border-[#D71E27]">
+                <h2 class="text-lg font-bold text-[#D71E27] mb-2">Emails</h2>
+                <pre id="emailsContent"></pre>
+            </div>
+
+            <!-- Processing Response Field -->
+            <div id="responseField" class="bg-white p-4 rounded-lg w-1/2 text-left text-md text-[#141414] overflow-auto max-h-full border border-[#D71E27]">
+                <h2 class="text-lg font-bold text-[#D71E27] mb-2">Processing Response</h2>
+                <pre id="responseContent"></pre>
+            </div>
+        </div>
+
+        <!-- Single Output Box for Service Request Types -->
+        <div id="serviceRequestField" class="hidden bg-white p-4 rounded-lg text-left text-md text-[#141414] overflow-auto max-h-full border border-[#D71E27] mt-6 w-full">
+            <h2 class="text-lg font-bold text-[#D71E27] mb-2">Configured Service Request Types</h2>
+            <pre id="serviceRequestContent"></pre>
+        </div>
     </div>
 
     <script>
-        document.getElementById('callButton').addEventListener('click', function() {
-            const button = document.getElementById('callButton');
-            const responseField = document.getElementById('responseField');
+        function syntaxHighlight(json) {
+            json = JSON.stringify(json, null, 2);
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|\b-?\d+(\.\d*)?([eE][+\-]?\d+)?\b)/g, function (match) {
+                let cls = 'json-value';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-key';
+                } else if (/null/.test(match)) {
+                    cls = 'json-value';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        function fetchData(apiUrl, method = 'GET', bodyData = null, isServiceRequest = false) {
+            const emailsField = document.getElementById('emailsContent');
+            const responseField = document.getElementById('responseContent');
+            const serviceRequestField = document.getElementById('serviceRequestField');
+            const serviceRequestContent = document.getElementById('serviceRequestContent');
             const loadingText = document.getElementById('loading');
-
-            // Show loading text and disable button
+            const emailResponseContainer = document.getElementById('emailResponseContainer');
+            
             loadingText.classList.remove("hidden");
-            button.disabled = true;
-            button.classList.add("opacity-50");
 
-            fetch('/api/call_application', {
-                method: 'GET',
+            fetch(apiUrl, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
-                // body: JSON.stringify({})
+                body: bodyData ? JSON.stringify(bodyData) : null
             })
             .then(response => response.json())
             .then(data => {
-                responseField.textContent = JSON.stringify(data, null, 2);
+                if (isServiceRequest) {
+                    serviceRequestField.classList.remove("hidden");
+                    emailResponseContainer.classList.add("hidden");
+                    serviceRequestContent.innerHTML = `<pre>${syntaxHighlight(data)}</pre>`;
+                } else {
+                    serviceRequestField.classList.add("hidden");
+                    emailResponseContainer.classList.remove("hidden");
+                    const emails = data.emails;
+                    const processingResponse = data.processing_response;
+                    emailsField.innerHTML = `<pre>${syntaxHighlight(emails)}</pre>`;
+                    responseField.innerHTML = `<pre>${syntaxHighlight(processingResponse)}</pre>`;
+                }
             })
             .catch(error => {
-                responseField.textContent = "Error: " + error;
+                const errorMsg = `<pre style="color: red;">Error: ${error}</pre>`;
+                if (isServiceRequest) {
+                    serviceRequestContent.innerHTML = errorMsg;
+                } else {
+                    emailsField.innerHTML = errorMsg;
+                    responseField.innerHTML = errorMsg;
+                }
             })
             .finally(() => {
-                // Hide loading text and re-enable button
                 loadingText.classList.add("hidden");
-                button.disabled = false;
-                button.classList.remove("opacity-50");
             });
+        }
+
+        document.getElementById('callButton').addEventListener('click', function() {
+            const scenarioId = document.getElementById('scenarioSelect').value;
+            fetchData('/api/call_application', 'POST', { scenario_id: scenarioId }, false);
+        });
+
+        document.getElementById('callServiceRequests').addEventListener('click', function() {
+            fetchData('/api/get_configured_service_requests', 'GET', null, true);
         });
     </script>
 

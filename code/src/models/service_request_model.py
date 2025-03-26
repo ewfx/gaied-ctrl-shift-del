@@ -45,3 +45,14 @@ class ServiceRequest:
             for sub_request_type, sub_request in self.sub_service_requests.items():
                 print(f"\n  Sub-Service Request Type: {sub_request_type}")
                 sub_request.display_definition()
+
+    def to_dict(self) -> dict:
+        return {
+            "request_type": self.request_type,
+            "description": self.description,
+            "dynamic_fields": self.dynamic_fields,
+            "sub_service_requests": {
+                k: v.to_dict() for k, v in self.sub_service_requests.items()
+            },
+            "fixed_fields": self.fixed_fields,
+        }

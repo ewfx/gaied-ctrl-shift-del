@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, jsonify, render_template
 from email_service_manager import EmailServiceManager
 from email_processor import EmailProcessor
@@ -9,7 +10,9 @@ app = Flask(__name__)
 
 API_KEY = ""
 if not API_KEY:
-    raise ValueError("API key not set. Please configure HF_API_KEY as an environment variable.")
+    raise ValueError(
+        "API key not set. Please configure HF_API_KEY as an environment variable."
+    )
 
 llm = HuggingFaceLLM(API_KEY)
 email_processor = EmailProcessor(
@@ -18,16 +21,42 @@ email_processor = EmailProcessor(
     confidence_threshold=0.5,
 )
 email_service_manager = EmailServiceManager(email_processor)
+
+
 # Define the API endpoint
-@app.route("/api/call_application", methods=["GET"])
+@app.route("/api/call_application", methods=["POST"])
 def call_application():
-    
-    response = []
-    for thread in email_threads:
-        result=email_service_manager.process_email(thread)
-        response.append(result.to_dict())
-    # result = {"message": "Application called successfully"}
-    return jsonify(response)
+    data = request.get_json()
+    scenario_id = data.get("scenario_id")  # Extract scenario_id from request body
+
+    if not scenario_id:
+        return jsonify({"error": "Missing scenario_id"}), 400
+
+    # Fetch filtered email threads based on scenario_id
+    filtered_threads = email_threads.get(scenario_id, [])
+
+    if not filtered_threads:
+        return jsonify({"error": f"No emails found for scenario {scenario_id}"}), 404
+
+    # Convert each email thread to a dictionary
+    emails_json = [thread.to_dict() for thread in filtered_threads]
+
+    # Process emails and generate response
+    processing_response = [
+        email_service_manager.process_email(thread).to_dict()
+        for thread in filtered_threads
+    ]
+
+    return jsonify({"emails": emails_json, "processing_response": processing_response})
+
+
+@app.route("/api/get_configured_service_requests", methods=["GET"])
+def get_supported_service_requests():
+    json_output = json.dumps(
+        {key: value.to_dict() for key, value in supported_service_requests.items()},
+        indent=4,
+    )
+    return jsonify({"request_types": json_output})
 
 
 # Serve the HTML file
